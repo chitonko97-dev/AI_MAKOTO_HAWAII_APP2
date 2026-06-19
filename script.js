@@ -219,12 +219,25 @@ function isGreetingOnly(input) {
 
 function pickSpots(message, spotList) {
   const query = message.toLowerCase();
-  return spotList
+  const rankedSpots = spotList
     .map((spot) => ({ spot, score: scoreSpot(query, spot) }))
     .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 4)
     .map((entry) => entry.spot);
+
+  const defaultSpots = spotList
+    .filter((spot) => spot.noCarFriendly || spot.area.includes("ワイキキ"))
+    .slice(0, 4);
+
+  if (rankedSpots.length === 0) return defaultSpots;
+  if (rankedSpots.length >= 3) return rankedSpots;
+
+  const rankedNames = new Set(rankedSpots.map((spot) => spot.name));
+  return [
+    ...rankedSpots,
+    ...defaultSpots.filter((spot) => !rankedNames.has(spot.name)),
+  ].slice(0, 4);
 }
 
 function scoreSpot(query, spot) {
@@ -244,7 +257,7 @@ function scoreSpot(query, spot) {
 
   const keywordGroups = [
     ["初日", "到着", "午後", "無理なく"],
-    ["ごはん", "食事", "ランチ", "ディナー", "朝食", "カフェ"],
+    ["ごはん", "食事", "ランチ", "ディナー", "朝食", "カフェ", "お腹", "腹", "おなか", "食べ", "レストラン"],
     ["買い物", "ショッピング", "お土産"],
     ["ハワイイ", "紹介", "動画"],
     ["レンタカーなし", "車なし", "徒歩", "バス", "トロリー"],
@@ -252,6 +265,7 @@ function scoreSpot(query, spot) {
     ["子連れ", "家族", "キッズ"],
     ["夫婦", "カップル"],
     ["安い", "予算", "節約"],
+    ["おすすめ", "オススメ", "どこ", "場所", "スポット", "候補"],
   ];
 
   keywordGroups.flat().forEach((keyword) => {
@@ -266,6 +280,7 @@ function scoreSpot(query, spot) {
   if (query.includes("ハワイイ") && spot.featuredByHawaii) score += 5;
   if ((query.includes("レンタカーなし") || query.includes("車なし")) && spot.noCarFriendly) score += 5;
   if ((query.includes("雨") || query.includes("屋内")) && spot.rainFriendly) score += 5;
+  if ((query.includes("お腹") || query.includes("おなか") || query.includes("腹") || query.includes("食べ")) && joined.includes("食事")) score += 6;
 
   return score;
 }
