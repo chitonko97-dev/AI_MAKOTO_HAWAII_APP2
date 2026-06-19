@@ -1,6 +1,6 @@
 const openingScreen = document.querySelector("#openingScreen");
 const chatScreen = document.querySelector("#chatScreen");
-const startBtn = document.querySelector("#startBtn");
+const openingTabButtons = document.querySelectorAll("[data-open-tab]");
 const backToOpening = document.querySelector("#backToOpening");
 const chat = document.querySelector("#chat");
 const userInput = document.querySelector("#userInput");
@@ -8,8 +8,6 @@ const sendBtn = document.querySelector("#sendBtn");
 const tabButtons = document.querySelectorAll("[data-tab]");
 const tabPanels = document.querySelectorAll("[data-tab-panel]");
 const wantList = document.querySelector("#wantList");
-const genreFilters = document.querySelector("#genreFilters");
-const mapGroups = document.querySelector("#mapGroups");
 const dayGroups = document.querySelector("#dayGroups");
 const makeShareText = document.querySelector("#makeShareText");
 const copyShareText = document.querySelector("#copyShareText");
@@ -23,7 +21,6 @@ let itinerary = loadStoredValue("aiMakotoItinerary", {
   day2: [],
   day3: [],
 });
-let activeGenre = "all";
 
 const greetingReply =
   "アロハー、AIまことです〜！😆\nハワイのことなら何でも聞いてくださいね〜！\n初日の過ごし方、ごはん、買い物、ハワイイ!?で紹介された場所など、気軽に相談してくださいーーーっ🌴";
@@ -31,10 +28,10 @@ const greetingReply =
 const thinkingText =
   "AIまこと、考えています〜！\n少しだけ待っててくださいねーーーっ😆🌴";
 
-startBtn.addEventListener("click", () => {
-  openingScreen.classList.remove("active");
-  chatScreen.classList.add("active");
-  userInput.focus();
+openingTabButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openAppTab(button.dataset.openTab);
+  });
 });
 
 backToOpening.addEventListener("click", () => {
@@ -228,6 +225,12 @@ function switchTab(tabName) {
   if (tabName === "consult") userInput.focus();
 }
 
+function openAppTab(tabName) {
+  openingScreen.classList.remove("active");
+  chatScreen.classList.add("active");
+  switchTab(tabName);
+}
+
 function saveSpot(spot, button) {
   if (isSavedSpot(spot.name)) return;
   savedSpots = [...savedSpots, spot];
@@ -253,8 +256,6 @@ function isSavedSpot(name) {
 
 function renderSavedViews() {
   renderWantList();
-  renderGenreFilters();
-  renderMapGroups();
   renderItinerary();
 }
 
@@ -267,48 +268,6 @@ function renderWantList() {
 
   savedSpots.forEach((spot) => {
     wantList.append(createSavedSpotCard(spot, { showDayButtons: true, showDelete: true }));
-  });
-}
-
-function renderGenreFilters() {
-  const filters = ["all", "ごはん", "買い物", "ビーチ", "観光", "休憩"];
-  genreFilters.innerHTML = "";
-  filters.forEach((filter) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = activeGenre === filter ? "active" : "";
-    button.textContent = filter === "all" ? "すべて" : filter;
-    button.addEventListener("click", () => {
-      activeGenre = filter;
-      renderMapGroups();
-      renderGenreFilters();
-    });
-    genreFilters.append(button);
-  });
-}
-
-function renderMapGroups() {
-  mapGroups.innerHTML = "";
-  const filteredSpots = savedSpots.filter(matchesGenreFilter);
-
-  if (filteredSpots.length === 0) {
-    mapGroups.append(createEmptyState("保存したスポットが、エリア別にここへ表示されます。"));
-    return;
-  }
-
-  const groups = groupByArea(filteredSpots);
-  Object.entries(groups).forEach(([areaLabel, groupSpots]) => {
-    const section = document.createElement("section");
-    section.className = "area-group";
-    const title = document.createElement("h3");
-    title.textContent = areaLabel;
-    const list = document.createElement("div");
-    list.className = "saved-list compact-list";
-    groupSpots.forEach((spot) => {
-      list.append(createSavedSpotCard(spot, { compact: true }));
-    });
-    section.append(title, list);
-    mapGroups.append(section);
   });
 }
 
@@ -453,43 +412,6 @@ function createEmptyState(text) {
   state.className = "empty-state";
   state.textContent = text;
   return state;
-}
-
-function groupByArea(spotList) {
-  const groups = {
-    "ワイキキ周辺": [],
-    "アラモアナ方面": [],
-    "カイルア方面": [],
-    "ノースショア方面": [],
-    "その他": [],
-  };
-
-  spotList.forEach((spot) => {
-    groups[getAreaGroup(spot.area)].push(spot);
-  });
-
-  return Object.fromEntries(Object.entries(groups).filter(([, groupSpots]) => groupSpots.length > 0));
-}
-
-function getAreaGroup(area) {
-  if (area.includes("ワイキキ")) return "ワイキキ周辺";
-  if (area.includes("アラモアナ")) return "アラモアナ方面";
-  if (area.includes("カイルア")) return "カイルア方面";
-  if (area.includes("ノース")) return "ノースショア方面";
-  return "その他";
-}
-
-function matchesGenreFilter(spot) {
-  if (activeGenre === "all") return true;
-  const joined = [spot.name, spot.genre, spot.makotoComment, ...(spot.tags || [])].join(" ");
-  const genreMap = {
-    "ごはん": ["ごはん", "食事", "レストラン", "カフェ", "ポケ", "軽食"],
-    "買い物": ["買い物", "ショッピング", "お土産"],
-    "ビーチ": ["ビーチ", "散歩", "景色"],
-    "観光": ["観光", "紹介", "動画", "水族館"],
-    "休憩": ["休憩", "カフェ", "公園", "散歩"],
-  };
-  return (genreMap[activeGenre] || [activeGenre]).some((keyword) => joined.includes(keyword));
 }
 
 function findSpotByName(name) {

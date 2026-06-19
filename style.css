@@ -155,12 +155,18 @@ h1 {
   color: #394147;
 }
 
+.opening-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
 .primary-btn,
+.secondary-btn,
 #sendBtn,
 .spot-actions a,
 .prompt-examples button,
 .spot-actions button,
-.filter-row button,
 .bottom-nav button {
   border: 0;
   border-radius: 8px;
@@ -170,9 +176,15 @@ h1 {
 
 .primary-btn {
   width: 100%;
-  margin-top: 24px;
   background: var(--coral);
   color: #fff;
+}
+
+.secondary-btn {
+  width: 100%;
+  color: var(--teal-dark);
+  border: 1px solid var(--line);
+  background: var(--paper);
 }
 
 .chat-screen {
@@ -386,7 +398,6 @@ h1 {
 }
 
 .saved-list,
-.map-groups,
 .day-groups {
   display: grid;
   gap: 14px;
@@ -413,35 +424,6 @@ h1 {
   background: rgba(255, 255, 255, 0.7);
 }
 
-.filter-row {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-  min-height: 58px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 4px 0 12px;
-  margin-bottom: 14px;
-  scrollbar-width: thin;
-}
-
-.filter-row button {
-  flex: 0 0 auto;
-  min-width: 82px;
-  padding: 10px 14px;
-  color: var(--teal-dark);
-  border: 1px solid var(--line);
-  background: var(--paper);
-  white-space: nowrap;
-}
-
-.filter-row button.active {
-  color: #fff;
-  background: var(--teal);
-}
-
-.area-group,
 .day-group,
 .share-panel {
   border: 1px solid var(--line);
@@ -450,7 +432,6 @@ h1 {
   background: rgba(255, 255, 255, 0.82);
 }
 
-.area-group h3,
 .day-group h3 {
   margin: 0 0 12px;
   font-size: 20px;
@@ -504,7 +485,7 @@ h1 {
   z-index: 30;
   width: min(980px, 100%);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   transform: translateX(-50%);
   padding: 10px clamp(12px, 3vw, 24px) calc(10px + env(safe-area-inset-bottom));

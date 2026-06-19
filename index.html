@@ -30,7 +30,11 @@
           「ハワイイ!?で紹介された場所に行ってみたい！」</p>
           <p>そんな感じで気軽に相談してもらえれば、あなたに合ったハワイの過ごし方をご提案しますーーーっ🌴</p>
         </div>
-        <button class="primary-btn" id="startBtn">AIまことに相談する</button>
+        <div class="opening-actions">
+          <button class="primary-btn" data-open-tab="consult" type="button">AIまことにハワイについて相談</button>
+          <button class="secondary-btn" data-open-tab="want" type="button">行きたい場所リスト</button>
+          <button class="secondary-btn" data-open-tab="itinerary" type="button">しおり</button>
+        </div>
       </section>
     </main>
 
@@ -71,15 +75,6 @@
         <div class="saved-list" id="wantList"></div>
       </section>
 
-      <section class="tab-panel saved-view" id="mapTab" data-tab-panel="map">
-        <div class="section-heading">
-          <p class="eyebrow">My Hawaii Map</p>
-          <h2>マイハワイMAP</h2>
-        </div>
-        <div class="filter-row" id="genreFilters"></div>
-        <div class="map-groups" id="mapGroups"></div>
-      </section>
-
       <section class="tab-panel saved-view" id="itineraryTab" data-tab-panel="itinerary">
         <div class="section-heading">
           <p class="eyebrow">Trip Plan</p>
@@ -96,7 +91,6 @@
       <nav class="bottom-nav" aria-label="メインナビゲーション">
         <button class="active" data-tab="consult" type="button">相談</button>
         <button data-tab="want" type="button">行きたい</button>
-        <button data-tab="map" type="button">マップ</button>
         <button data-tab="itinerary" type="button">しおり</button>
       </nav>
     </main>
