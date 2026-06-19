@@ -1,0 +1,13 @@
+{
+  "name": "ai-makoto-hawaii-app",
+  "version": "10.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "vercel": "^44.7.3"
+  }
+}
