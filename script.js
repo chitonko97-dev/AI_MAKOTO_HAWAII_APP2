@@ -35,13 +35,6 @@ document.querySelectorAll("[data-prompt]").forEach((button) => {
 });
 
 userInput.addEventListener("input", resizeComposer);
-userInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    submitMessage();
-  }
-});
-
 sendBtn.addEventListener("click", submitMessage);
 
 loadSpots();
