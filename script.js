@@ -90,7 +90,7 @@ async function submitMessage() {
 
     if (!response.ok) {
       const details = await response.text();
-      throw new Error(details || `API ${response.status}`);
+      throw new ApiError(response.status, details || `API ${response.status}`);
     }
 
     const data = await response.json();
@@ -102,15 +102,30 @@ async function submitMessage() {
   } catch (error) {
     console.error("AIまことAPIエラー", error);
     thinkingRow.remove();
-    appendMessage(
-      "bot",
-      "すみません〜！🙇\nいま少しうまく回答できませんでした。\n少し時間をおいて、もう一度試してみてください〜！"
-    );
+    appendMessage("bot", fallbackErrorReply(error));
+    if (selectedSpots.length > 0) {
+      appendSpotCards(selectedSpots);
+    }
   } finally {
     isSending = false;
     sendBtn.disabled = false;
     userInput.focus();
   }
+}
+
+class ApiError extends Error {
+  constructor(status, details) {
+    super(details);
+    this.status = status;
+  }
+}
+
+function fallbackErrorReply(error) {
+  if (error instanceof ApiError && (error.status === 429 || error.status === 503)) {
+    return "すみません〜！🙇\nいまAIまこと側が少し混み合っています。\n短い案内文はうまく作れなかったのですが、候補スポットは下に出しておきますねーーーっ🌴";
+  }
+
+  return "すみません〜！🙇\nいま少しうまく回答できませんでした。\n候補スポットは下に出しておきますねーーーっ🌴";
 }
 
 function appendMessage(role, text, options = {}) {
