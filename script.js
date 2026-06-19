@@ -101,14 +101,17 @@ async function loadReferenceRate() {
   const fallbackRate = calcRate.value || "155";
 
   try {
-    const response = await fetch("https://api.frankfurter.app/latest?from=USD&to=JPY");
+    const response = await fetch("/api/rate");
     if (!response.ok) throw new Error(`rate API ${response.status}`);
     const data = await response.json();
-    const jpyRate = Number(data?.rates?.JPY);
+    const jpyRate = Number(data?.rate);
     if (!jpyRate) throw new Error("JPY rate missing");
 
     calcRate.value = jpyRate.toFixed(2);
-    rateStatus.textContent = `Frankfurter APIの参考レートを反映しました：1ドル 約${formatNumber(jpyRate)}円`;
+    rateStatus.textContent =
+      data.source === "frankfurter"
+        ? `Frankfurter APIの参考レートを反映しました：1ドル 約${formatNumber(jpyRate)}円`
+        : `参考レートを取得できなかったため、手入力の初期値 ${formatNumber(jpyRate)}円を使っています。`;
     updateCalcResult();
   } catch (error) {
     console.warn("参考レートの取得に失敗しました", error);
