@@ -415,18 +415,25 @@ h1 {
 
 .filter-row {
   display: flex;
+  flex: 0 0 auto;
+  align-items: center;
   gap: 8px;
+  min-height: 58px;
   overflow-x: auto;
-  padding-bottom: 12px;
+  overflow-y: hidden;
+  padding: 4px 0 12px;
   margin-bottom: 14px;
+  scrollbar-width: thin;
 }
 
 .filter-row button {
   flex: 0 0 auto;
-  padding: 8px 12px;
+  min-width: 82px;
+  padding: 10px 14px;
   color: var(--teal-dark);
   border: 1px solid var(--line);
   background: var(--paper);
+  white-space: nowrap;
 }
 
 .filter-row button.active {
