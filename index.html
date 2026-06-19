@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ハワイイ!? AIまこと プロトタイプ v9</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">🌴</div>
+        <div>
+          <p class="eyebrow">ハワイイ!?</p>
+          <h1>AIまこと</h1>
+        </div>
+      </div>
+      <span class="status">Prototype v9</span>
+    </header>
+
+    <main class="screen active" id="openingScreen">
+      <section class="opening-card">
+        <div class="makoto-face">ま</div>
+        <div class="opening-copy">
+          <p>アロハー、AIまことです〜！😆</p>
+          <p>ハワイに関することについて、何でも聞いてくださいね〜！</p>
+          <p class="quote">「初日の午後、どう過ごしたらいいかなぁ？」<br>
+          「ワイキキ周辺でごはんを探したい！」<br>
+          「ハワイイ!?で紹介された場所に行ってみたい！」</p>
+          <p>そんな感じで気軽に相談してもらえれば、あなたに合ったハワイの過ごし方をご提案しますーーーっ🌴</p>
+        </div>
+        <button class="primary-btn" id="startBtn">AIまことに相談する</button>
+      </section>
+    </main>
+
+    <main class="screen chat-screen" id="chatScreen">
+      <div class="chat-toolbar">
+        <button class="text-btn" id="backToOpening">← オープニングに戻る</button>
+      </div>
+
+      <section class="chat" id="chat">
+        <section class="message-row bot">
+          <div class="avatar">ま</div>
+          <div class="bubble bot-bubble">
+            <p>ではでは、相談内容を入力してくださいね〜！😆</p>
+            <p>ワイキキ滞在を前提に、旅行プラン・ごはん・買い物・ハワイイ!?で紹介された場所など、気軽に聞いてくださいーーーっ🌴</p>
+          </div>
+        </section>
+
+        <section class="prompt-examples">
+          <p>たとえば、こんな感じで聞けます〜！</p>
+          <button data-prompt="初日の午後、ワイキキ周辺で無理なく過ごすならどこがいい？">初日の午後、どう過ごす？</button>
+          <button data-prompt="ワイキキ周辺でごはんを探したいです">ワイキキ周辺でごはんを探したい</button>
+          <button data-prompt="ハワイイ!?で紹介された場所に行ってみたいです">ハワイイ!?で紹介された場所に行きたい</button>
+        </section>
+      </section>
+
+      <footer class="composer">
+        <textarea id="userInput" rows="1" placeholder="AIまことに相談する..."></textarea>
+        <button id="sendBtn" aria-label="送信">送信</button>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
