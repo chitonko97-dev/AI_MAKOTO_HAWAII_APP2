@@ -67,6 +67,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .logo,
@@ -76,15 +77,24 @@ button {
   place-items: center;
   flex: 0 0 auto;
   color: #fff;
-  background: var(--teal);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 127, 130, 0.18)),
+    var(--teal);
+  background-image: url("assets/makoto-avatar.png");
+  background-size: 118%;
+  background-position: center 17%;
+  background-repeat: no-repeat;
   font-weight: 800;
+  font-size: 0;
+  line-height: 0;
 }
 
 .logo {
   width: 48px;
   height: 48px;
   border-radius: 8px;
-  font-size: 26px;
+  border: 1px solid rgba(0, 127, 130, 0.18);
 }
 
 .eyebrow {
@@ -98,6 +108,7 @@ h1 {
   margin: 0;
   font-size: clamp(24px, 5vw, 36px);
   letter-spacing: 0;
+  line-height: 1.05;
 }
 
 .status {
@@ -135,7 +146,8 @@ h1 {
   height: 72px;
   border-radius: 50%;
   margin-bottom: 22px;
-  font-size: 34px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 28px rgba(31, 42, 50, 0.14);
 }
 
 .opening-copy {
@@ -244,6 +256,7 @@ h1 {
   width: 38px;
   height: 38px;
   border-radius: 50%;
+  border: 1px solid rgba(0, 127, 130, 0.18);
 }
 
 .bubble {
@@ -536,6 +549,20 @@ h1 {
 @media (max-width: 720px) {
   .app {
     width: 100%;
+  }
+
+  .app-header {
+    padding: 14px 16px;
+  }
+
+  .logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .status {
+    font-size: 12px;
+    padding: 6px 9px;
   }
 
   .prompt-examples {
