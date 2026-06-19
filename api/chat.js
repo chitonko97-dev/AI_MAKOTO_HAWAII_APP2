@@ -36,9 +36,9 @@ export default async function handler(request, response) {
             },
           ],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.55,
             topP: 0.9,
-            maxOutputTokens: 420,
+            maxOutputTokens: 180,
           },
         }),
       }
@@ -80,8 +80,9 @@ function buildPrompt(message, spots) {
 ワイキキ滞在の旅行者に、明るく親しみやすい日本語で返答します。
 
 厳守:
-- 350文字以内
-- 短い案内文だけを書く
+- 180文字以内
+- 2〜3文の短い案内文だけを書く
+- 文章は必ず句点「。」か絵文字で自然に終える
 - URLを書かない
 - スポット一覧や箇条書きを書かない
 - スポット名を大量に並べない
@@ -100,5 +101,26 @@ function sanitizeReply(text) {
     "いいですね〜！😆\nワイキキ滞在なら、移動に無理が出ない場所から選ぶのがおすすめです。\n下に候補スポットを出しておきますねーーーっ🌴";
 
   const withoutUrls = (text || fallback).replace(/https?:\/\/\S+/g, "").trim();
-  return withoutUrls.length > 350 ? `${withoutUrls.slice(0, 347)}...` : withoutUrls;
+  const shortened = withoutUrls.length > 180 ? withoutUrls.slice(0, 180).trim() : withoutUrls;
+  const complete = trimToCompleteSentence(shortened);
+
+  if (complete.length < 25) return fallback;
+  return complete;
+}
+
+function trimToCompleteSentence(text) {
+  if (/[。！？!?🌴😆]$/.test(text)) return text;
+
+  const lastBreak = Math.max(
+    text.lastIndexOf("。"),
+    text.lastIndexOf("！"),
+    text.lastIndexOf("？"),
+    text.lastIndexOf("!"),
+    text.lastIndexOf("?"),
+    text.lastIndexOf("🌴"),
+    text.lastIndexOf("😆")
+  );
+
+  if (lastBreak < 24) return "";
+  return text.slice(0, lastBreak + 1).trim();
 }
