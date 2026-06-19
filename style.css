@@ -31,6 +31,7 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
@@ -175,6 +176,7 @@ h1 {
 
 .primary-btn,
 .secondary-btn,
+.danger-btn,
 #sendBtn,
 .spot-actions a,
 .prompt-examples button,
@@ -197,6 +199,23 @@ h1 {
   color: var(--teal-dark);
   border: 1px solid var(--line);
   background: var(--paper);
+}
+
+input {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 18px;
+}
+
+input:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 127, 130, 0.14);
 }
 
 .chat-screen {
@@ -398,7 +417,23 @@ h1 {
 .danger-btn {
   color: #9d2f27;
   border: 1px solid #f0c5c0 !important;
+  border-radius: 8px;
+  min-height: 44px;
+  padding: 9px 12px;
   background: #fff5f3;
+  font-weight: 800;
+}
+
+.danger-btn:disabled,
+.primary-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.wide-action {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 10px 12px;
 }
 
 .section-heading {
@@ -437,8 +472,20 @@ h1 {
   background: rgba(255, 255, 255, 0.7);
 }
 
+.storage-note {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff8e5;
+  line-height: 1.7;
+}
+
 .day-group,
-.share-panel {
+.share-panel,
+.calc-card,
+.calc-history-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
@@ -477,6 +524,130 @@ h1 {
   justify-self: start;
 }
 
+.calc-card {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.calc-card h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.calc-grid label,
+.custom-tip {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.tip-control {
+  display: grid;
+  gap: 10px;
+}
+
+.rate-status {
+  margin: -4px 0 0;
+  color: var(--teal-dark);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.tip-control p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.tip-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tip-buttons button {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--teal-dark);
+  background: var(--paper);
+  font-weight: 800;
+}
+
+.tip-buttons button.active {
+  color: #fff;
+  background: var(--teal);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.calc-result {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--wash);
+}
+
+.calc-result p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.calc-result dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.calc-result dt {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.calc-result dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.makoto-note {
+  margin-top: 12px !important;
+  color: var(--teal-dark);
+  font-weight: 800;
+}
+
+.inline-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inline-heading h2 {
+  font-size: 24px;
+}
+
+.calc-history-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.calc-history-card h3 {
+  font-size: 16px;
+}
+
 .composer {
   position: fixed;
   left: 50%;
@@ -498,7 +669,7 @@ h1 {
   z-index: 30;
   width: min(980px, 100%);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   transform: translateX(-50%);
   padding: 10px clamp(12px, 3vw, 24px) calc(10px + env(safe-area-inset-bottom));
@@ -584,5 +755,26 @@ h1 {
 
   .section-heading h2 {
     font-size: 24px;
+  }
+
+  .calc-grid,
+  .tip-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .inline-heading {
+    display: grid;
+  }
+
+  .inline-heading .danger-btn {
+    width: 100%;
+  }
+
+  .primary-btn.compact {
+    width: 100%;
+  }
+
+  .calc-result dd {
+    font-size: 16px;
   }
 }

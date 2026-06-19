@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ハワイイ!? AIまこと プロトタイプ v10</title>
+  <title>ハワイイ!? AIまこと プロトタイプ v12</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,7 +16,7 @@
           <h1>AIまこと</h1>
         </div>
       </div>
-      <span class="status">Prototype v10</span>
+      <span class="status">Prototype v12</span>
     </header>
 
     <main class="screen active" id="openingScreen">
@@ -34,6 +34,7 @@
           <button class="primary-btn" data-open-tab="consult" type="button">AIまことにハワイについて相談</button>
           <button class="secondary-btn" data-open-tab="want" type="button">行きたい場所リスト</button>
           <button class="secondary-btn" data-open-tab="itinerary" type="button">しおり</button>
+          <button class="secondary-btn" data-open-tab="calc" type="button">為替・チップ計算</button>
         </div>
       </section>
     </main>
@@ -72,6 +73,8 @@
           <p class="eyebrow">My Hawaii</p>
           <h2>行きたいリスト</h2>
         </div>
+        <p class="storage-note">保存内容は、この端末・このブラウザ内に保存されます。別のスマホやPCでは表示されません。</p>
+        <button class="danger-btn wide-action" id="clearWantList" type="button">行きたいリストをすべて削除</button>
         <div class="saved-list" id="wantList"></div>
       </section>
 
@@ -80,6 +83,8 @@
           <p class="eyebrow">Trip Plan</p>
           <h2>旅のしおり</h2>
         </div>
+        <p class="storage-note">保存内容は、この端末・このブラウザ内に保存されます。別のスマホやPCでは表示されません。</p>
+        <button class="danger-btn wide-action" id="clearItinerary" type="button">しおりをすべて削除</button>
         <div class="share-panel">
           <button class="primary-btn compact" id="makeShareText">共有テキストを作る</button>
           <textarea id="shareText" rows="7" readonly placeholder="ここに共有テキストが表示されます"></textarea>
@@ -88,10 +93,68 @@
         <div class="day-groups" id="dayGroups"></div>
       </section>
 
+      <section class="tab-panel saved-view" id="calcTab" data-tab-panel="calc">
+        <div class="section-heading">
+          <p class="eyebrow">Travel Calculator</p>
+          <h2>為替・チップ計算</h2>
+        </div>
+        <p class="storage-note">為替レートは目安です。実際のカード決済・両替レートとは異なる場合があります。必要に応じて最新レートを入力してください。</p>
+
+        <section class="calc-card">
+          <h3>ドル→円・チップ計算</h3>
+          <div class="calc-grid">
+            <label>
+              <span>ドル金額</span>
+              <input id="calcAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="例：50" />
+            </label>
+            <label>
+              <span>為替レート</span>
+              <input id="calcRate" type="number" inputmode="decimal" min="0" step="0.01" value="155" />
+            </label>
+            <label>
+              <span>人数</span>
+              <input id="calcPeople" type="number" inputmode="numeric" min="1" step="1" value="1" />
+            </label>
+          </div>
+          <p class="rate-status" id="rateStatus">USD/JPY参考レートを確認しています...</p>
+
+          <div class="tip-control">
+            <p>チップ率</p>
+            <div class="tip-buttons" id="tipButtons">
+              <button class="active" data-tip="15" type="button">15%</button>
+              <button data-tip="18" type="button">18%</button>
+              <button data-tip="20" type="button">20%</button>
+              <button data-tip="custom" type="button">カスタム</button>
+            </div>
+            <label class="custom-tip hidden" id="customTipWrap">
+              <span>カスタムチップ率</span>
+              <input id="customTipRate" type="number" inputmode="decimal" min="0" step="0.1" value="18" />
+            </label>
+          </div>
+
+          <div class="calc-result" id="calcResult">
+            <p>ドル金額を入れると、円換算とチップ込みの目安が出ます。</p>
+          </div>
+          <button class="primary-btn compact" id="saveCalcResult" type="button">計算結果を保存</button>
+        </section>
+
+        <section class="calc-history-panel">
+          <div class="section-heading inline-heading">
+            <div>
+              <p class="eyebrow">Memo</p>
+              <h2>計算履歴</h2>
+            </div>
+            <button class="danger-btn" id="clearCalcHistory" type="button">計算履歴をすべて削除</button>
+          </div>
+          <div class="saved-list" id="calcHistoryList"></div>
+        </section>
+      </section>
+
       <nav class="bottom-nav" aria-label="メインナビゲーション">
         <button class="active" data-tab="consult" type="button">相談</button>
         <button data-tab="want" type="button">行きたい</button>
         <button data-tab="itinerary" type="button">しおり</button>
+        <button data-tab="calc" type="button">計算</button>
       </nav>
     </main>
   </div>

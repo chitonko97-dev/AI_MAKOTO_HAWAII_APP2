@@ -12,6 +12,19 @@ const dayGroups = document.querySelector("#dayGroups");
 const makeShareText = document.querySelector("#makeShareText");
 const copyShareText = document.querySelector("#copyShareText");
 const shareText = document.querySelector("#shareText");
+const clearWantList = document.querySelector("#clearWantList");
+const clearItinerary = document.querySelector("#clearItinerary");
+const calcAmount = document.querySelector("#calcAmount");
+const calcRate = document.querySelector("#calcRate");
+const calcPeople = document.querySelector("#calcPeople");
+const rateStatus = document.querySelector("#rateStatus");
+const tipButtons = document.querySelectorAll("[data-tip]");
+const customTipWrap = document.querySelector("#customTipWrap");
+const customTipRate = document.querySelector("#customTipRate");
+const calcResult = document.querySelector("#calcResult");
+const saveCalcResult = document.querySelector("#saveCalcResult");
+const calcHistoryList = document.querySelector("#calcHistoryList");
+const clearCalcHistory = document.querySelector("#clearCalcHistory");
 
 let spots = [];
 let isSending = false;
@@ -21,6 +34,9 @@ let itinerary = loadStoredValue("aiMakotoItinerary", {
   day2: [],
   day3: [],
 });
+let calcHistory = loadStoredValue("aiMakotoCalcHistory", []);
+let selectedTipRate = 15;
+let latestCalcResult = null;
 
 const greetingReply =
   "アロハー、AIまことです〜！😆\nハワイのことなら何でも聞いてくださいね〜！\n初日の過ごし方、ごはん、買い物、ハワイイ!?で紹介された場所など、気軽に相談してくださいーーーっ🌴";
@@ -54,9 +70,21 @@ tabButtons.forEach((button) => {
 });
 makeShareText.addEventListener("click", generateShareText);
 copyShareText.addEventListener("click", copyGeneratedText);
+clearWantList.addEventListener("click", clearAllSavedSpots);
+clearItinerary.addEventListener("click", clearAllItinerary);
+clearCalcHistory.addEventListener("click", clearAllCalcHistory);
+saveCalcResult.addEventListener("click", saveCurrentCalcResult);
+[calcAmount, calcRate, calcPeople, customTipRate].forEach((input) => {
+  input.addEventListener("input", updateCalcResult);
+});
+tipButtons.forEach((button) => {
+  button.addEventListener("click", () => selectTipRate(button.dataset.tip));
+});
 
 loadSpots();
+loadReferenceRate();
 renderSavedViews();
+updateCalcResult();
 
 async function loadSpots() {
   try {
@@ -66,6 +94,27 @@ async function loadSpots() {
   } catch (error) {
     console.error("spots.jsonの読み込みに失敗しました", error);
     spots = [];
+  }
+}
+
+async function loadReferenceRate() {
+  const fallbackRate = calcRate.value || "155";
+
+  try {
+    const response = await fetch("https://api.frankfurter.app/latest?from=USD&to=JPY");
+    if (!response.ok) throw new Error(`rate API ${response.status}`);
+    const data = await response.json();
+    const jpyRate = Number(data?.rates?.JPY);
+    if (!jpyRate) throw new Error("JPY rate missing");
+
+    calcRate.value = jpyRate.toFixed(2);
+    rateStatus.textContent = `Frankfurter APIの参考レートを反映しました：1ドル 約${formatNumber(jpyRate)}円`;
+    updateCalcResult();
+  } catch (error) {
+    console.warn("参考レートの取得に失敗しました", error);
+    calcRate.value = fallbackRate;
+    rateStatus.textContent = `参考レートを取得できなかったため、手入力の初期値 ${formatNumber(fallbackRate)}円を使っています。`;
+    updateCalcResult();
   }
 }
 
@@ -257,10 +306,12 @@ function isSavedSpot(name) {
 function renderSavedViews() {
   renderWantList();
   renderItinerary();
+  renderCalcHistory();
 }
 
 function renderWantList() {
   wantList.innerHTML = "";
+  clearWantList.disabled = savedSpots.length === 0;
   if (savedSpots.length === 0) {
     wantList.append(createEmptyState("気になったスポットを保存すると、ここに一覧で表示されます。"));
     return;
@@ -273,6 +324,7 @@ function renderWantList() {
 
 function renderItinerary() {
   dayGroups.innerHTML = "";
+  clearItinerary.disabled = !Object.values(itinerary).some((names) => names.length > 0);
   ["day1", "day2", "day3"].forEach((dayKey, index) => {
     const section = document.createElement("section");
     section.className = "day-group";
@@ -327,8 +379,9 @@ function createSavedSpotCard(spot, options = {}) {
       const dayButton = document.createElement("button");
       dayButton.type = "button";
       dayButton.className = "save-spot-btn";
-      dayButton.textContent = `DAY${index + 1}に追加`;
-      dayButton.disabled = itinerary[dayKey]?.includes(spot.name);
+      const alreadyInDay = itinerary[dayKey]?.includes(spot.name);
+      dayButton.textContent = alreadyInDay ? `DAY${index + 1}に追加済み` : `DAY${index + 1}に追加`;
+      dayButton.disabled = alreadyInDay;
       dayButton.addEventListener("click", () => addSpotToDay(spot.name, dayKey));
       actions.append(dayButton);
     });
@@ -365,6 +418,24 @@ function addSpotToDay(name, dayKey) {
   }
 }
 
+function clearAllSavedSpots() {
+  if (!savedSpots.length) return;
+  if (!confirm("行きたいリストをすべて削除しますか？しおりに入れた同じスポットも削除されます。")) return;
+  savedSpots = [];
+  itinerary = { day1: [], day2: [], day3: [] };
+  storeValue("aiMakotoWantList", savedSpots);
+  storeValue("aiMakotoItinerary", itinerary);
+  renderSavedViews();
+}
+
+function clearAllItinerary() {
+  if (!Object.values(itinerary).some((names) => names.length > 0)) return;
+  if (!confirm("しおりをすべて削除しますか？行きたいリストは残ります。")) return;
+  itinerary = { day1: [], day2: [], day3: [] };
+  storeValue("aiMakotoItinerary", itinerary);
+  renderSavedViews();
+}
+
 function removeSpotFromDay(name, dayKey) {
   itinerary[dayKey] = (itinerary[dayKey] || []).filter((spotName) => spotName !== name);
   storeValue("aiMakotoItinerary", itinerary);
@@ -376,6 +447,7 @@ function generateShareText() {
     "AIまことが作ったハワイ旅しおり🌴",
     "",
     "この旅、かなりいい感じですーーーっ😆🌴",
+    "ワイキキ滞在をベースに、無理なく楽しめるハワイ旅メモです〜！",
     "",
   ];
 
@@ -392,6 +464,160 @@ function generateShareText() {
 
   lines.push("#AIまこと #ハワイイ #ハワイ旅行");
   shareText.value = lines.join("\n").trim();
+}
+
+function selectTipRate(value) {
+  tipButtons.forEach((button) => button.classList.toggle("active", button.dataset.tip === value));
+  customTipWrap.classList.toggle("hidden", value !== "custom");
+  selectedTipRate = value === "custom" ? Number(customTipRate.value || 0) : Number(value);
+  updateCalcResult();
+}
+
+function getCalcValues() {
+  const amount = Math.max(0, Number(calcAmount.value || 0));
+  const rate = Math.max(0, Number(calcRate.value || 0));
+  const people = Math.max(1, Math.floor(Number(calcPeople.value || 1)));
+  const tipRate = document.querySelector("[data-tip].active")?.dataset.tip === "custom"
+    ? Math.max(0, Number(customTipRate.value || 0))
+    : selectedTipRate;
+  const tipAmount = amount * (tipRate / 100);
+  const totalUsd = amount + tipAmount;
+  const totalJpy = totalUsd * rate;
+  const perPersonUsd = totalUsd / people;
+  const perPersonJpy = totalJpy / people;
+
+  return {
+    amount,
+    rate,
+    people,
+    tipRate,
+    tipAmount,
+    totalUsd,
+    totalJpy,
+    perPersonUsd,
+    perPersonJpy,
+  };
+}
+
+function updateCalcResult() {
+  const values = getCalcValues();
+  latestCalcResult = values.amount > 0 && values.rate > 0 ? values : null;
+
+  if (!latestCalcResult) {
+    calcResult.innerHTML = "<p>ドル金額を入れると、円換算とチップ込みの目安が出ます。</p>";
+    saveCalcResult.disabled = true;
+    return;
+  }
+
+  saveCalcResult.disabled = false;
+  const yenOnly = values.amount * values.rate;
+  calcResult.innerHTML = `
+    <dl>
+      <div><dt>円換算</dt><dd>${formatUsd(values.amount)}ドル × ${formatNumber(values.rate)}円 = 約${formatJpy(yenOnly)}円</dd></div>
+      <div><dt>チップ額</dt><dd>${formatUsd(values.tipAmount)}ドル（${formatNumber(values.tipRate)}%）</dd></div>
+      <div><dt>チップ込み合計</dt><dd>${formatUsd(values.totalUsd)}ドル / 約${formatJpy(values.totalJpy)}円</dd></div>
+      <div><dt>人数割り</dt><dd>${values.people}人で割ると、1人あたり${formatUsd(values.perPersonUsd)}ドル / 約${formatJpy(values.perPersonJpy)}円</dd></div>
+    </dl>
+    <p class="makoto-note">${createCalcComment(values)}</p>
+  `;
+}
+
+function createCalcComment(values) {
+  if (values.totalJpy >= 30000) {
+    return "なかなかいいお値段です〜！😆 カード決済レートやチップ込みの合計も見ながら、無理なく楽しんでくださいね〜！";
+  }
+  return "チップ込みだとこのくらいです〜！旅行中の目安にしてくださいねーーーっ😆🌴";
+}
+
+function saveCurrentCalcResult() {
+  if (!latestCalcResult) return;
+  const item = {
+    id: `calc-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    amount: latestCalcResult.amount,
+    rate: latestCalcResult.rate,
+    tipRate: latestCalcResult.tipRate,
+    tipAmount: latestCalcResult.tipAmount,
+    totalUsd: latestCalcResult.totalUsd,
+    totalJpy: latestCalcResult.totalJpy,
+    people: latestCalcResult.people,
+    perPersonUsd: latestCalcResult.perPersonUsd,
+    perPersonJpy: latestCalcResult.perPersonJpy,
+  };
+  calcHistory = [item, ...calcHistory].slice(0, 20);
+  storeValue("aiMakotoCalcHistory", calcHistory);
+  renderCalcHistory();
+}
+
+function renderCalcHistory() {
+  calcHistoryList.innerHTML = "";
+  clearCalcHistory.disabled = calcHistory.length === 0;
+  if (calcHistory.length === 0) {
+    calcHistoryList.append(createEmptyState("保存した計算結果がここに表示されます。"));
+    return;
+  }
+
+  calcHistory.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "spot-card calc-history-card";
+    const title = document.createElement("h3");
+    title.textContent = formatDateTime(item.createdAt);
+    const body = document.createElement("p");
+    body.textContent = `食事代 ${formatUsd(item.amount)}ドル / チップ ${formatNumber(item.tipRate)}% / 合計 ${formatUsd(item.totalUsd)}ドル（約${formatJpy(item.totalJpy)}円）`;
+    const split = document.createElement("p");
+    split.className = "spot-note";
+    split.textContent = `${item.people}人なら1人あたり ${formatUsd(item.perPersonUsd)}ドル / 約${formatJpy(item.perPersonJpy)}円`;
+    const actions = document.createElement("div");
+    actions.className = "spot-actions";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger-btn";
+    deleteButton.textContent = "削除";
+    deleteButton.addEventListener("click", () => removeCalcHistoryItem(item.id));
+    actions.append(deleteButton);
+    card.append(title, body, split, actions);
+    calcHistoryList.append(card);
+  });
+}
+
+function removeCalcHistoryItem(id) {
+  calcHistory = calcHistory.filter((item) => item.id !== id);
+  storeValue("aiMakotoCalcHistory", calcHistory);
+  renderCalcHistory();
+}
+
+function clearAllCalcHistory() {
+  if (!calcHistory.length) return;
+  if (!confirm("計算履歴をすべて削除しますか？")) return;
+  calcHistory = [];
+  storeValue("aiMakotoCalcHistory", calcHistory);
+  renderCalcHistory();
+}
+
+function formatUsd(value) {
+  return Number(value).toLocaleString("ja-JP", {
+    minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatJpy(value) {
+  return Math.round(value).toLocaleString("ja-JP");
+}
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("ja-JP", {
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatDateTime(value) {
+  return new Date(value).toLocaleString("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 async function copyGeneratedText() {
