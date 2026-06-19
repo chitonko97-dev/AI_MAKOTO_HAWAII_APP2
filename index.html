@@ -39,27 +39,66 @@
         <button class="text-btn" id="backToOpening">← オープニングに戻る</button>
       </div>
 
-      <section class="chat" id="chat">
-        <section class="message-row bot">
-          <div class="avatar">ま</div>
-          <div class="bubble bot-bubble">
-            <p>ではでは、相談内容を入力してくださいね〜！😆</p>
-            <p>ワイキキ滞在を前提に、旅行プラン・ごはん・買い物・ハワイイ!?で紹介された場所など、気軽に聞いてくださいーーーっ🌴</p>
-          </div>
+      <section class="tab-panel active" id="consultTab" data-tab-panel="consult">
+        <section class="chat" id="chat">
+          <section class="message-row bot">
+            <div class="avatar">ま</div>
+            <div class="bubble bot-bubble">
+              <p>ではでは、相談内容を入力してくださいね〜！😆</p>
+              <p>ワイキキ滞在を前提に、旅行プラン・ごはん・買い物・ハワイイ!?で紹介された場所など、気軽に聞いてくださいーーーっ🌴</p>
+            </div>
+          </section>
+
+          <section class="prompt-examples">
+            <p>たとえば、こんな感じで聞けます〜！</p>
+            <button data-prompt="初日の午後、ワイキキ周辺で無理なく過ごすならどこがいい？">初日の午後、どう過ごす？</button>
+            <button data-prompt="ワイキキ周辺でごはんを探したいです">ワイキキ周辺でごはんを探したい</button>
+            <button data-prompt="ハワイイ!?で紹介された場所に行ってみたいです">ハワイイ!?で紹介された場所に行きたい</button>
+          </section>
         </section>
 
-        <section class="prompt-examples">
-          <p>たとえば、こんな感じで聞けます〜！</p>
-          <button data-prompt="初日の午後、ワイキキ周辺で無理なく過ごすならどこがいい？">初日の午後、どう過ごす？</button>
-          <button data-prompt="ワイキキ周辺でごはんを探したいです">ワイキキ周辺でごはんを探したい</button>
-          <button data-prompt="ハワイイ!?で紹介された場所に行ってみたいです">ハワイイ!?で紹介された場所に行きたい</button>
-        </section>
+        <footer class="composer">
+          <textarea id="userInput" rows="1" placeholder="AIまことに相談する..."></textarea>
+          <button id="sendBtn" aria-label="送信">送信</button>
+        </footer>
       </section>
 
-      <footer class="composer">
-        <textarea id="userInput" rows="1" placeholder="AIまことに相談する..."></textarea>
-        <button id="sendBtn" aria-label="送信">送信</button>
-      </footer>
+      <section class="tab-panel saved-view" id="wantTab" data-tab-panel="want">
+        <div class="section-heading">
+          <p class="eyebrow">My Hawaii</p>
+          <h2>行きたいリスト</h2>
+        </div>
+        <div class="saved-list" id="wantList"></div>
+      </section>
+
+      <section class="tab-panel saved-view" id="mapTab" data-tab-panel="map">
+        <div class="section-heading">
+          <p class="eyebrow">My Hawaii Map</p>
+          <h2>マイハワイMAP</h2>
+        </div>
+        <div class="filter-row" id="genreFilters"></div>
+        <div class="map-groups" id="mapGroups"></div>
+      </section>
+
+      <section class="tab-panel saved-view" id="itineraryTab" data-tab-panel="itinerary">
+        <div class="section-heading">
+          <p class="eyebrow">Trip Plan</p>
+          <h2>旅のしおり</h2>
+        </div>
+        <div class="share-panel">
+          <button class="primary-btn compact" id="makeShareText">共有テキストを作る</button>
+          <textarea id="shareText" rows="7" readonly placeholder="ここに共有テキストが表示されます"></textarea>
+          <button class="text-btn copy-btn" id="copyShareText">共有テキストをコピー</button>
+        </div>
+        <div class="day-groups" id="dayGroups"></div>
+      </section>
+
+      <nav class="bottom-nav" aria-label="メインナビゲーション">
+        <button class="active" data-tab="consult" type="button">相談</button>
+        <button data-tab="want" type="button">行きたい</button>
+        <button data-tab="map" type="button">マップ</button>
+        <button data-tab="itinerary" type="button">しおり</button>
+      </nav>
     </main>
   </div>
 
