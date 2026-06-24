@@ -44,6 +44,40 @@ const greetingReply =
 const thinkingText =
   "AIまこと、考えています〜！\n少しだけ待っててくださいねーーーっ😆🌴";
 
+const keywordCategories = {
+  ごはん: ["お腹", "おなか", "腹", "食べ", "ランチ", "ディナー", "朝食", "ごはん", "レストラン", "カフェ", "フード", "ポケ"],
+  買い物: ["買い物", "ショッピング", "お土産", "スーパー", "モール", "アラモアナ", "ドンキ"],
+  ビーチ: ["ビーチ", "海", "泳ぐ", "夕日", "サンセット", "砂浜"],
+  観光: ["観光", "名所", "景色", "写真", "撮影", "ダイヤモンドヘッド", "見る"],
+  散歩: ["散歩", "歩き", "ぶらぶら", "散策", "歩く"],
+  雨の日: ["雨", "雨の日", "屋内", "濡れない", "天気悪い", "天気が悪い"],
+  レンタカーなし: ["レンタカーなし", "車なし", "徒歩", "バス", "Uber", "uber", "トロリー", "近場"],
+  初日: ["初日", "到着", "午後", "着いた", "着いて", "無理なく"],
+  朝: ["朝", "午前", "朝食", "モーニング"],
+  夜: ["夜", "夕方", "ディナー", "バー", "サンセット"],
+  子連れ: ["子連れ", "家族", "キッズ", "子ども", "子供"],
+  ワイキキ周辺: ["ワイキキ", "近場", "徒歩", "ホテル周辺"],
+  アラモアナ方面: ["アラモアナ", "ドンキ", "ウォルマート", "カカアコ"],
+  "ハワイイ!?紹介スポット": ["ハワイイ", "ハワイイ!?", "紹介", "動画", "YouTube", "youtube"],
+};
+
+const keywordReplies = {
+  ごはん: "お腹すいてきましたね〜！😆 ワイキキ周辺で行きやすそうなごはんスポットを出してみましたーーーっ🌴",
+  買い物: "買い物したい感じですね〜！お土産探しにも使いやすそうなスポットを出してみましたーーーっ😆",
+  ビーチ: "海を感じたい気分ですね〜！無理なく行きやすそうなビーチ寄りスポットを出してみましたーーーっ🌴",
+  観光: "観光したい感じですね〜！ハワイらしさを味わいやすい候補を出してみましたーーーっ😆",
+  散歩: "軽く散歩するなら、移動しやすくて景色も楽しめる場所がいいですね〜！候補を出してみましたーーーっ🌴",
+  雨の日: "雨の日は無理せず、屋内寄りで楽しめる場所が安心ですね〜！行きやすそうな候補を出してみましたーーーっ🌴",
+  レンタカーなし: "レンタカーなしなら、徒歩・バス・トロリーで動きやすい場所が安心です〜！候補を出してみましたーーーっ😆",
+  初日: "初日は移動で疲れやすいので、ワイキキ周辺で無理なく楽しめる場所がいいですね〜！候補を出してみましたーーーっ🌴",
+  朝: "朝の時間なら、軽めに動けて気持ちよく過ごせる場所がいいですね〜！候補を出してみましたーーーっ😆",
+  夜: "夜は移動しすぎず、雰囲気よく楽しめる場所が安心です〜！候補を出してみましたーーーっ🌴",
+  子連れ: "子連れなら、移動しやすくて休憩しやすい場所を選ぶのが安心ですね〜！候補を出してみましたーーーっ😆",
+  ワイキキ周辺: "ワイキキ周辺なら、徒歩でも動きやすい場所から選ぶのがよさそうです〜！候補を出してみましたーーーっ🌴",
+  アラモアナ方面: "アラモアナ方面ですね〜！買い物やごはんをまとめやすい候補を出してみましたーーーっ😆",
+  "ハワイイ!?紹介スポット": "ハワイイ!?で気になった場所ですね〜！紹介スポット寄りで候補を出してみましたーーーっ🌴",
+};
+
 openingTabButtons.forEach((button) => {
   button.addEventListener("click", () => {
     openAppTab(button.dataset.openTab);
@@ -81,7 +115,7 @@ tipButtons.forEach((button) => {
   button.addEventListener("click", () => selectTipRate(button.dataset.tip));
 });
 
-loadSpots();
+const spotsReady = loadSpots();
 loadReferenceRate();
 renderSavedViews();
 updateCalcResult();
@@ -131,6 +165,13 @@ async function submitMessage() {
 
   if (isGreetingOnly(message)) {
     appendMessage("bot", greetingReply);
+    logSuggestionDebug({
+      mode: "greeting",
+      categories: [],
+      usedGemini: false,
+      fallback: false,
+      spotCount: 0,
+    });
     return;
   }
 
@@ -138,7 +179,28 @@ async function submitMessage() {
   sendBtn.disabled = true;
   const thinkingRow = appendMessage("bot", thinkingText, { thinking: true });
 
-  const selectedSpots = pickSpots(message, spots);
+  await spotsReady;
+  const categories = detectKeywordCategories(message);
+  const selectedSpots = pickSpots(message, spots, categories);
+
+  if (categories.length > 0) {
+    thinkingRow.remove();
+    appendMessage("bot", buildKeywordReply(categories));
+    if (selectedSpots.length > 0) {
+      appendSpotCards(selectedSpots);
+    }
+    logSuggestionDebug({
+      mode: "keyword",
+      categories,
+      usedGemini: false,
+      fallback: false,
+      spotCount: selectedSpots.length,
+    });
+    isSending = false;
+    sendBtn.disabled = false;
+    userInput.focus();
+    return;
+  }
 
   try {
     const response = await fetch("/api/chat", {
@@ -163,13 +225,27 @@ async function submitMessage() {
     if (selectedSpots.length > 0) {
       appendSpotCards(selectedSpots);
     }
+    logSuggestionDebug({
+      mode: "gemini",
+      categories,
+      usedGemini: true,
+      fallback: false,
+      spotCount: selectedSpots.length,
+    });
   } catch (error) {
     console.error("AIまことAPIエラー", error);
     thinkingRow.remove();
-    appendMessage("bot", fallbackErrorReply(error));
+    appendMessage("bot", buildFallbackReply(error, categories));
     if (selectedSpots.length > 0) {
       appendSpotCards(selectedSpots);
     }
+    logSuggestionDebug({
+      mode: "fallback",
+      categories,
+      usedGemini: true,
+      fallback: true,
+      spotCount: selectedSpots.length,
+    });
   } finally {
     isSending = false;
     sendBtn.disabled = false;
@@ -190,6 +266,11 @@ function fallbackErrorReply(error) {
   }
 
   return "すみません〜！🙇\nいま少しうまく回答できませんでした。\n候補スポットは下に出しておきますねーーーっ🌴";
+}
+
+function buildFallbackReply(error, categories) {
+  if (categories.length > 0) return buildKeywordReply(categories);
+  return fallbackErrorReply(error);
 }
 
 function appendMessage(role, text, options = {}) {
@@ -693,10 +774,38 @@ function isGreetingOnly(input) {
   return greetings.some((greeting) => normalized === greeting);
 }
 
-function pickSpots(message, spotList) {
+function detectKeywordCategories(message) {
+  const query = normalizeText(message);
+  return Object.entries(keywordCategories)
+    .filter(([, keywords]) => keywords.some((keyword) => query.includes(normalizeText(keyword))))
+    .map(([category]) => category);
+}
+
+function buildKeywordReply(categories) {
+  const primaryCategory = categories[0];
+  return keywordReplies[primaryCategory] || fallbackTravelReply();
+}
+
+function logSuggestionDebug({ mode, categories, usedGemini, fallback, spotCount }) {
+  console.log("AI Makoto suggestion debug", {
+    mode,
+    categories,
+    usedGemini,
+    fallback,
+    spotCount,
+  });
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[!！?？。、,.…\s]/g, "");
+}
+
+function pickSpots(message, spotList, categories = []) {
   const query = message.toLowerCase();
   const rankedSpots = spotList
-    .map((spot) => ({ spot, score: scoreSpot(query, spot) }))
+    .map((spot) => ({ spot, score: scoreSpot(query, spot, categories) }))
     .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 4)
@@ -716,7 +825,7 @@ function pickSpots(message, spotList) {
   ].slice(0, 4);
 }
 
-function scoreSpot(query, spot) {
+function scoreSpot(query, spot, categories = []) {
   let score = 0;
   const joined = [
     spot.name,
@@ -730,6 +839,27 @@ function scoreSpot(query, spot) {
   ]
     .join(" ")
     .toLowerCase();
+
+  categories.forEach((category) => {
+    const keywords = keywordCategories[category] || [];
+    const normalizedJoined = normalizeText(joined);
+    if (keywords.some((keyword) => normalizedJoined.includes(normalizeText(keyword)))) score += 7;
+    if ((spot.tags || []).some((tag) => String(tag) === category)) score += 8;
+    if (category === "ごはん" && /食事|レストラン|カフェ|ポケ|フード/.test(joined)) score += 8;
+    if (category === "買い物" && /買い物|ショッピング|スーパー|モール/.test(joined)) score += 8;
+    if (category === "ビーチ" && /ビーチ|海|サンセット/.test(joined)) score += 8;
+    if (category === "観光" && /観光|景色|公園|名所/.test(joined)) score += 6;
+    if (category === "散歩" && /散歩|徒歩|公園|景色/.test(joined)) score += 7;
+    if (category === "雨の日" && spot.rainFriendly) score += 10;
+    if (category === "レンタカーなし" && spot.noCarFriendly) score += 10;
+    if (category === "初日" && (spot.noCarFriendly || spot.area.includes("ワイキキ"))) score += 8;
+    if (category === "朝" && /朝食|カフェ|散歩|公園/.test(joined)) score += 6;
+    if (category === "夜" && /ディナー|夜|夕方|サンセット|レストラン/.test(joined)) score += 6;
+    if (category === "子連れ" && /子連れ|家族|キッズ|公園/.test(joined)) score += 8;
+    if (category === "ワイキキ周辺" && spot.area.includes("ワイキキ")) score += 10;
+    if (category === "アラモアナ方面" && /アラモアナ|カカアコ|ドンキ|ウォルマート/.test(joined)) score += 10;
+    if (category === "ハワイイ!?紹介スポット" && spot.featuredByHawaii) score += 10;
+  });
 
   const keywordGroups = [
     ["初日", "到着", "午後", "無理なく"],
