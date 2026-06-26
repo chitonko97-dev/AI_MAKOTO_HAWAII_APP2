@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ハワイイ!? AIまこと プロトタイプ v13</title>
+  <meta name="theme-color" content="#007f82" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="AIまこと" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>ハワイイ!? AIまこと プロトタイプ v14</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,7 +22,7 @@
           <h1>AIまこと</h1>
         </div>
       </div>
-      <span class="status">Prototype v13</span>
+      <span class="status">Prototype v14</span>
     </header>
 
     <main class="screen active" id="openingScreen">
@@ -171,5 +177,14 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((error) => {
+          console.warn("Service Worker registration failed", error);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
