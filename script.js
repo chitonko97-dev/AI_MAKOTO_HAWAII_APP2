@@ -25,6 +25,9 @@ const calcResult = document.querySelector("#calcResult");
 const saveCalcResult = document.querySelector("#saveCalcResult");
 const calcHistoryList = document.querySelector("#calcHistoryList");
 const clearCalcHistory = document.querySelector("#clearCalcHistory");
+const refreshNews = document.querySelector("#refreshNews");
+const newsStatus = document.querySelector("#newsStatus");
+const newsList = document.querySelector("#newsList");
 
 let spots = [];
 let isSending = false;
@@ -37,6 +40,7 @@ let itinerary = loadStoredValue("aiMakotoItinerary", {
 let calcHistory = loadStoredValue("aiMakotoCalcHistory", []);
 let selectedTipRate = 15;
 let latestCalcResult = null;
+let newsLoaded = false;
 
 const greetingReply =
   "アロハー、AIまことです〜！😆\nハワイのことなら何でも聞いてくださいね〜！\n初日の過ごし方、ごはん、買い物、ハワイイ!?で紹介された場所など、気軽に相談してくださいーーーっ🌴";
@@ -108,6 +112,7 @@ clearWantList.addEventListener("click", clearAllSavedSpots);
 clearItinerary.addEventListener("click", clearAllItinerary);
 clearCalcHistory.addEventListener("click", clearAllCalcHistory);
 saveCalcResult.addEventListener("click", saveCurrentCalcResult);
+refreshNews.addEventListener("click", () => loadNews({ force: true }));
 [calcAmount, calcRate, calcPeople, customTipRate].forEach((input) => {
   input.addEventListener("input", updateCalcResult);
 });
@@ -355,6 +360,7 @@ function switchTab(tabName) {
   });
 
   renderSavedViews();
+  if (tabName === "news") loadNews();
   if (tabName === "consult") userInput.focus();
 }
 
@@ -362,6 +368,68 @@ function openAppTab(tabName) {
   openingScreen.classList.remove("active");
   chatScreen.classList.add("active");
   switchTab(tabName);
+}
+
+async function loadNews(options = {}) {
+  if (newsLoaded && !options.force) return;
+
+  newsLoaded = true;
+  refreshNews.disabled = true;
+  newsStatus.textContent = "ニュースを読み込んでいます...";
+  newsList.innerHTML = "";
+
+  try {
+    const response = await fetch("/api/news");
+    if (!response.ok) throw new Error(`news API ${response.status}`);
+    const data = await response.json();
+    renderNews(data.items || []);
+    newsStatus.textContent = data.items?.length
+      ? `最新見出しを${data.items.length}件表示しています。`
+      : "ニュースが見つかりませんでした。時間を置いて更新してください。";
+    console.log("AI Makoto news debug", {
+      source: data.source,
+      fetchedAt: data.fetchedAt,
+      count: data.items?.length || 0,
+    });
+  } catch (error) {
+    console.error("ニュースの読み込みに失敗しました", error);
+    newsLoaded = false;
+    newsStatus.textContent = "ニュースを取得できませんでした。時間を置いて更新してください。";
+    newsList.append(createEmptyState("通信状況やニュース取得元の状態によって、読み込めない場合があります。"));
+  } finally {
+    refreshNews.disabled = false;
+  }
+}
+
+function renderNews(items) {
+  newsList.innerHTML = "";
+
+  if (items.length === 0) {
+    newsList.append(createEmptyState("ハワイ関連ニュースが見つかりませんでした。"));
+    return;
+  }
+
+  items.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "news-card";
+
+    const title = document.createElement("h3");
+    title.textContent = item.title;
+
+    const meta = document.createElement("p");
+    meta.className = "news-meta";
+    meta.textContent = [item.source, formatNewsDate(item.pubDate)].filter(Boolean).join(" / ");
+
+    const action = document.createElement("a");
+    action.className = "map-link news-link";
+    action.href = item.link;
+    action.target = "_blank";
+    action.rel = "noopener noreferrer";
+    action.textContent = "記事を開く";
+
+    card.append(title, meta, action);
+    newsList.append(card);
+  });
 }
 
 function saveSpot(spot, button) {
@@ -697,6 +765,18 @@ function formatNumber(value) {
 
 function formatDateTime(value) {
   return new Date(value).toLocaleString("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatNewsDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("ja-JP", {
     month: "numeric",
     day: "numeric",
     hour: "2-digit",

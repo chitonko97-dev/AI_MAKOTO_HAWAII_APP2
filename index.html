@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ハワイイ!? AIまこと プロトタイプ v12</title>
+  <title>ハワイイ!? AIまこと プロトタイプ v13</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,20 +16,21 @@
           <h1>AIまこと</h1>
         </div>
       </div>
-      <span class="status">Prototype v12</span>
+      <span class="status">Prototype v13</span>
     </header>
 
     <main class="screen active" id="openingScreen">
       <section class="opening-card">
         <div class="makoto-face">ま</div>
         <div class="opening-copy">
-          <p>ハワイ旅行の相談、行きたい場所の保存、しおり作り、為替・チップ計算ができます。</p>
+          <p>ハワイ旅行の相談、行きたい場所の保存、しおり作り、ニュース確認、為替・チップ計算ができます。</p>
           <p>使いたいメニューを選んでください。</p>
         </div>
         <div class="opening-actions">
           <button class="primary-btn" data-open-tab="consult" type="button">AIまことにハワイについて相談</button>
           <button class="secondary-btn" data-open-tab="want" type="button">行きたい場所リスト</button>
           <button class="secondary-btn" data-open-tab="itinerary" type="button">しおり</button>
+          <button class="secondary-btn" data-open-tab="news" type="button">ハワイ関連ニュース</button>
           <button class="secondary-btn" data-open-tab="calc" type="button">為替・チップ計算</button>
         </div>
       </section>
@@ -87,6 +88,19 @@
           <button class="text-btn copy-btn" id="copyShareText">共有テキストをコピー</button>
         </div>
         <div class="day-groups" id="dayGroups"></div>
+      </section>
+
+      <section class="tab-panel saved-view" id="newsTab" data-tab-panel="news">
+        <div class="section-heading inline-heading">
+          <div>
+            <p class="eyebrow">Hawaii News</p>
+            <h2>ハワイ関連ニュース</h2>
+          </div>
+          <button class="secondary-btn compact-action" id="refreshNews" type="button">更新</button>
+        </div>
+        <p class="storage-note">Google News RSSから「ハワイ」関連の見出しを取得します。記事の内容や公開日はリンク先で確認してください。</p>
+        <div class="news-status" id="newsStatus">ニュースを読み込んでいます...</div>
+        <div class="news-list" id="newsList"></div>
       </section>
 
       <section class="tab-panel saved-view" id="calcTab" data-tab-panel="calc">
@@ -150,6 +164,7 @@
         <button class="active" data-tab="consult" type="button">相談</button>
         <button data-tab="want" type="button">行きたい</button>
         <button data-tab="itinerary" type="button">しおり</button>
+        <button data-tab="news" type="button">ニュース</button>
         <button data-tab="calc" type="button">計算</button>
       </nav>
     </main>
