@@ -28,6 +28,12 @@ const clearCalcHistory = document.querySelector("#clearCalcHistory");
 const refreshNews = document.querySelector("#refreshNews");
 const newsStatus = document.querySelector("#newsStatus");
 const newsList = document.querySelector("#newsList");
+const PRODUCTION_API_ORIGIN = "https://ai-makoto-hawaii-app-2-k5v8.vercel.app";
+
+function getApiUrl(path) {
+  const isNativeApp = window.location.protocol === "capacitor:";
+  return `${isNativeApp ? PRODUCTION_API_ORIGIN : ""}${path}`;
+}
 
 let spots = [];
 let isSending = false;
@@ -140,7 +146,7 @@ async function loadReferenceRate() {
   const fallbackRate = calcRate.value || "155";
 
   try {
-    const response = await fetch("/api/rate");
+    const response = await fetch(getApiUrl("/api/rate"));
     if (!response.ok) throw new Error(`rate API ${response.status}`);
     const data = await response.json();
     const jpyRate = Number(data?.rate);
@@ -208,7 +214,7 @@ async function submitMessage() {
   }
 
   try {
-    const response = await fetch("/api/chat", {
+    const response = await fetch(getApiUrl("/api/chat"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -379,7 +385,7 @@ async function loadNews(options = {}) {
   newsList.innerHTML = "";
 
   try {
-    const response = await fetch("/api/news");
+    const response = await fetch(getApiUrl("/api/news"));
     if (!response.ok) throw new Error(`news API ${response.status}`);
     const data = await response.json();
     renderNews(data.items || []);

@@ -22,7 +22,7 @@
           <h1>AIまこと</h1>
         </div>
       </div>
-      <span class="status">Prototype v14</span>
+      <span class="status">Prototype v15</span>
     </header>
 
     <main class="screen active" id="openingScreen">
@@ -178,7 +178,7 @@
 
   <script src="script.js"></script>
   <script>
-    if ("serviceWorker" in navigator) {
+    if (window.location.protocol.startsWith("http") && "serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("/sw.js").catch((error) => {
           console.warn("Service Worker registration failed", error);

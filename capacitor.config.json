@@ -1,0 +1,9 @@
+{
+  "appId": "jp.hawaii1.aimakoto",
+  "appName": "AIまこと",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#ffffff"
+  }
+}

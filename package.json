@@ -5,9 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "ios:prepare": "node scripts/build-ios-web.mjs && cap sync ios",
+    "ios:add": "node scripts/build-ios-web.mjs && cap add ios",
+    "ios:open": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
     "vercel": "^44.7.3"
   }
 }

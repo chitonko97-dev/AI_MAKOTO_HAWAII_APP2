@@ -2,8 +2,15 @@ const NEWS_RSS_URL =
   "https://news.google.com/rss/search?q=%E3%83%8F%E3%83%AF%E3%82%A4&hl=ja&gl=JP&ceid=JP:ja";
 
 export default async function handler(request, response) {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+  if (request.method === "OPTIONS") {
+    return response.status(204).end();
+  }
+
   if (request.method !== "GET") {
-    response.setHeader("Allow", "GET");
+    response.setHeader("Allow", "GET, OPTIONS");
     return response.status(405).json({ error: "Method not allowed" });
   }
 
